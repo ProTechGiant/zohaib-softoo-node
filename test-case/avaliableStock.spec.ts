@@ -1,30 +1,39 @@
 import chai from "chai";
 const expect = chai.expect;
 import chaiHttp from "chai-http";
+import { CommonInterface, Error } from "../src/common/types/stockInterface";
+import { getAvaliableStock } from "../src/services/ReadJsonFile";
 
-import { getAvailableStock } from "../public/common/ReadJsonFile";
 chai.use(chaiHttp);
 const sku = "SXB930757/87/87";
-let findAvailableStock: any;
+
+let findAvaliableStock: CommonInterface;
 before(async function () {
-  findAvailableStock = await getAvailableStock(sku);
+  findAvaliableStock = await getAvaliableStock(sku);
 });
 
-describe("Available Stock test-case", function () {
-  it("get available stock", async function (done) {
-    if (findAvailableStock.status) {
-      expect(findAvailableStock.status).to.be.equal(200);
-      expect(findAvailableStock.success).to.be.equal(true);
-      expect(findAvailableStock.message).to.be.equal(
-        "available stock found successfully"
-      );
+describe("Avaliable Stock test-case", function () {
+  it("get avaliable stock", async function (done) {
+    if (
+      !(findAvaliableStock instanceof Error) &&
+      findAvaliableStock !== undefined
+    ) {
+      if (findAvaliableStock.success) {
+        expect(findAvaliableStock.status).to.be.equal(200);
+        expect(findAvaliableStock.success).to.be.equal(true);
+        expect(findAvaliableStock.message).to.be.equal(
+          "avaliable stock found successfully"
+        );
+        expect(findAvaliableStock.data).to.be.a("object");
+      }
     } else {
-      expect(findAvailableStock.status).to.be.equal(404);
-      expect(findAvailableStock.success).to.be.equal(false);
-      expect(findAvailableStock.message).to.be.equal(
-        "available stock found successfully"
-      );
+      expect(findAvaliableStock.status)
+        .to.be.equal(404)
+        .to.throw("Internal Server Error");
     }
+
     done();
   });
 });
+
+//chai http testcase

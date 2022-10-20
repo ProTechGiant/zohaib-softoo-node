@@ -8,6 +8,10 @@ import app from "../app";
 import debug from "debug";
 debug.debug("matri-site:server");
 import http from "http";
+import {
+  AddressInterface,
+  ErrorInterface,
+} from "../src/common/types/stockInterface";
 
 /**
  * Get port from environment and store in Express.
@@ -54,7 +58,7 @@ function normalizePort(val: string) {
  * Event listener for HTTP server "error" event.
  */
 
-function onError(error: any) {
+function onError(error: ErrorInterface) {
   if (error.syscall !== "listen") {
     throw error;
   }
@@ -81,7 +85,8 @@ function onError(error: any) {
  */
 
 function onListening() {
-  const addr: any = server.address();
-  const bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
+  const addr: AddressInterface | null | string = server.address();
+  const bind =
+    typeof addr === "string" ? `pipe   ${addr}` : `port  ${addr?.port}`;
   debug("Listening on " + bind);
 }

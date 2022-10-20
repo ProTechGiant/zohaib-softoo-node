@@ -5,7 +5,7 @@ import createError from "http-errors";
 import path from "path";
 import cookieParser from "cookie-parser";
 import logger from "morgan";
-import availableStockRouter from "./routes/availableStock";
+import avaliableStockRouter from "./src/routes/avaliableStock";
 
 const app = express();
 
@@ -19,7 +19,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use("/read-file", availableStockRouter);
+app.use("/read-file", avaliableStockRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req: Request, res: Response, next: NextFunction) {
@@ -29,7 +29,7 @@ app.get("/", async (req, res) => {
   res.send("Hello");
 });
 // error handler
-app.use(function (err: Error, req: Request, res: Response, next: NextFunction) {
+app.use(function (err: Error, req: Request, res: Response) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get("env") === "development" ? err : {};
