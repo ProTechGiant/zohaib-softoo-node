@@ -5,35 +5,38 @@ import { CommonInterface, Error } from "../src/common/types/stockInterface";
 import { getAvaliableStock } from "../src/services/ReadJsonFile";
 
 chai.use(chaiHttp);
-const sku = "SXB930757/87/87";
-
-let findAvaliableStock: CommonInterface;
-before(async function () {
-  findAvaliableStock = await getAvaliableStock(sku);
-});
 
 describe("Avaliable Stock test-case", function () {
-  it("get avaliable stock", async function (done) {
-    if (
-      !(findAvaliableStock instanceof Error) &&
-      findAvaliableStock !== undefined
-    ) {
-      if (findAvaliableStock.success) {
-        expect(findAvaliableStock.status).to.be.equal(200);
-        expect(findAvaliableStock.success).to.be.equal(true);
-        expect(findAvaliableStock.message).to.be.equal(
-          "avaliable stock found successfully"
-        );
-        expect(findAvaliableStock.data).to.be.a("object");
-      }
-    } else {
-      expect(findAvaliableStock.status)
-        .to.be.equal(404)
-        .to.throw("Internal Server Error");
-    }
+  it("get avaliable stock", function (done) {
+    const sku = "SXB930757/87/87";
+    getAvaliableStock(sku).then((response: CommonInterface | Error) => {
+      expect(response.status).to.be.equal(200);
+      expect(response.success).to.be.equal(true);
+      expect(response.message).to.be.equal(
+        "avaliable stock found successfully"
+      );
+      done();
+    });
+  });
+  it("Stock Not Found", function (done) {
+    const sku = "SXB9307D7/87/87";
+    getAvaliableStock(sku).then((response: CommonInterface | Error) => {
+      expect(response.status).to.be.equal(404);
+      expect(response.success).to.be.equal(false);
+      expect(response.message).to.be.equal(
+        `Sorry Stock or Transaction inside Sku: "${sku}" not exist `
+      );
+      done();
+    });
+  });
+  it("Stock Not Found", function (done) {
+    const sku = "";
+    getAvaliableStock(sku).then((response: CommonInterface | Error) => {
+      expect(response.status).to.be.equal(403);
+      expect(response.success).to.be.equal(false);
+      expect(response.message).to.be.equal("Sku is required");
 
-    done();
+      done();
+    });
   });
 });
-
-//chai http testcase

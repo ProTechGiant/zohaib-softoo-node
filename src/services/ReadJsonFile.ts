@@ -9,7 +9,9 @@ import {
 
 let filePath: string;
 
-export async function getFile(fileName: string) {
+export async function getFile(
+  fileName: string
+): Promise<AvaliableStock | Transactions | Error> {
   filePath = path.join(__dirname, fileName);
 
   const promise = new Promise<AvaliableStock | Transactions | Error>(function (
@@ -20,12 +22,11 @@ export async function getFile(fileName: string) {
       filePath,
       { encoding: "utf-8" },
       function (err, data: string) {
-        if (err) {
-          reject(err);
-        } else {
+        if (!err) {
           const readFile = JSON.parse(data);
           resolve(readFile);
         }
+        reject(err);
       }
     );
   });
@@ -33,7 +34,18 @@ export async function getFile(fileName: string) {
   return promise;
 }
 
-export const getAvaliableStock = async (sku: string) => {
+export async function getAvaliableStock(
+  sku: string
+): Promise<CommonInterface | Error> {
+  if (!sku) {
+    const resStock: Error = {
+      status: 403,
+      message: "Sku is required",
+      success: false,
+    };
+    return resStock;
+  }
+
   let refundOrder = 0,
     orderSum = 0,
     saleCurrent = 0,
@@ -42,22 +54,23 @@ export const getAvaliableStock = async (sku: string) => {
       stock: 0,
       newAvaliableStock: 0,
     },
-    message,
     status = 404,
     success = false;
   const id: string = sku;
+  let message = `Sorry Stock or Transaction inside Sku: "${id}" not exist `;
 
-  try {
-    const transactionsFile = await getFile(
-      "../common/utils/jsonData/transactions.json"
-    );
-    const stockFile: any = await getFile("../common/utils/jsonData/stock.json");
+  const transactionsFile = await getFile(
+    "../common/utils/jsonData/transactions.json"
+  );
 
+  const stockFile = await getFile("../common/utils/jsonData/stock.json");
+  if (Array.isArray(stockFile)) {
     const findSkuId: AvaliableStock = stockFile.find(
       (item: AvaliableStock) => item.sku === id
     );
+
     if (Array.isArray(transactionsFile)) {
-      const findSkuIdTransaction = transactionsFile.find(
+      const findSkuIdTransaction: Transactions = transactionsFile.find(
         (item: Transactions) => item.sku === id
       );
 
@@ -68,7 +81,7 @@ export const getAvaliableStock = async (sku: string) => {
             if (x.type == "refund") {
               refundOrder = refundOrder + x.qty;
             } else {
-              orderSum = orderSum + x?.qty;
+              orderSum = orderSum + x.qty;
             }
           });
 
@@ -78,19 +91,16 @@ export const getAvaliableStock = async (sku: string) => {
         status = 200;
         success = true;
         message = "avaliable stock found successfully";
-      } else {
-        message = `Sorry Stock or Transaction inside Sku: "${id}" not exist `;
       }
-      const resStock: CommonInterface = {
-        message,
-        status,
-        success,
-        data: avaliableStock,
-      };
-
-      return resStock;
     }
-  } catch (error: any) {
-    return error;
   }
-};
+
+  const resStock: CommonInterface = {
+    message,
+    status,
+    success,
+    data: avaliableStock,
+  };
+
+  return resStock;
+}
