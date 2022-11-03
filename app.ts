@@ -22,9 +22,9 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/read-file", avaliableStockRouter);
 
 // catch 404 and forward to error handler
-app.use(function (req: Request, res: Response, next: NextFunction) {
-  next(createError(404));
-});
+// app.use(function (req: Request, res: Response, next: NextFunction) {
+//   next(createError(404));
+// });
 app.get("/", async (req, res) => {
   res.send("Hello");
 });
